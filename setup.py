@@ -12,12 +12,12 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'twitter-scraper'
-DESCRIPTION = 'Scrape the Twitter Frontend API without authentication.'
-URL = 'https://github.com/kennethreitz/twitter-scraper'
-EMAIL = 'me@kennethreitz.org'
-AUTHOR = 'Kenneth Reitz'
-VERSION = '0.2.1'
+NAME = 'twitter-analysis'
+DESCRIPTION = 'Get tweets from the Twitter Frontend API without authentication.'
+URL = 'https://github.com/ferguras/twitter-analysis'
+EMAIL = 'ferguras@solwar.org'
+AUTHOR = 'Edwin de Haan'
+VERSION = '0.0.1'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
