@@ -43,6 +43,7 @@ def get_tweets(user, tweets=100, retweets=True, maxpages=25):
                         '.js-original-tweet')[0].attrs['data-screen-name']
                     time = datetime.fromtimestamp(
                         int(tweet.find('._timestamp')[0].attrs['data-time-ms']) / 1000.0)
+                    time = time.strftime("%Y-%m-%d %H:%M:%S")
                     interactions = [
                         x.text for x in tweet.find('.ProfileTweet-actionCount')]
                     replies = int(
