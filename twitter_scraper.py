@@ -4,7 +4,6 @@ from datetime import datetime
 
 session = HTMLSession()
 
-
 def get_tweets(user, tweets=100, retweets=True, maxpages=25):
     """Gets tweets for a given user, via the Twitter frontend API."""
 
