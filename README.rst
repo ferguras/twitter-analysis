@@ -1,20 +1,18 @@
-Twitter Scraper
+Twitter Analysis
 ===============
 
 Twitter's API is annoying to work with, and has lots of limitations —
-luckily their frontend (JavaScript) has it's own API, which I reverse–engineered.
+luckily their frontend (JavaScript) has it's own API, which Kennethreitz reverse–engineered.
 No API rate limits. No restrictions. Extremely fast.
 
-You can use this library to get the text of any user's Tweets trivially.
-
-Very useful for making markov chains.
+You can use this library to get the text of any user's Tweets and use the results for analysis.
 
 Usage
 =====
 
 .. code-block:: pycon
 
-    >>> from twitter_scraper import get_tweets
+    >>> from twitter_analysis import get_tweets
 
     >>> for tweet in get_tweets('kennethreitz', tweets=100):
     >>>     print(tweet)
@@ -23,33 +21,14 @@ Usage
     I’m not sure what this /dev/fd/5 business is, but it’s driving me up the wall.
     …
 
-It appears you can ask for up to 450 tweets reliably (25 pages).
-
-Markov Example
-==============
-
-First, install markovify:
-
-.. code-block:: shell
-
-    $ pipenv install markovify
-
-.. code-block:: pycon
-
-    >>> import markovify
-    
-    >>> tweets = '\n'.join([t for t in get_tweets('kennethreitz', tweets=25)])
-    >>> text_model = markovify.Text(tweets)
-    
-    >>> print(text_model.make_short_sentence(140))
-    Wtf you can’t use APFS on a prototype for “django-heroku”, which does a lot out of me.
+It appears you can ask for up to 450 tweets reliably (25 html pages).
 
 Installation
 ============
 
 .. code-block:: shell
 
-    $ pipenv install twitter-scraper
+    $ pipenv install twitter-analysis
 
 Only Python 3.6+ is supported
 
