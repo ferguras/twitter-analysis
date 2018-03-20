@@ -36,6 +36,7 @@ def get_tweets(user, tweets=100, retweets=True, maxpages=25):
                 data = tweet.find('.tweet-text')
                 if len(data) > 0:
                     text = tweet.find('.tweet-text')[0].full_text
+                    raw = tweet.find('.tweet-text')[0].raw_html
                     tweetId = tweet.find(
                         '.js-permalink')[0].attrs['data-conversation-id']
                     orginalUserId = tweet.find(
@@ -62,7 +63,7 @@ def get_tweets(user, tweets=100, retweets=True, maxpages=25):
                     if retweets or orginalUserId.lower() == user.lower():
                         found += -1
                         tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'orginaluser': orginalUserId,
-                                        'text': text, 'replies': replies, 'retweets': retweets, 'likes': likes,
+                                        'text': text, 'raw' : raw, 'replies': replies, 'retweets': retweets, 'likes': likes,
                                        'entries': {
                                            'hashtags': hashtags,
                                            'urls': urls,
