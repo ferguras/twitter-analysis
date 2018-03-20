@@ -13,11 +13,12 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'twitter-analysis'
-DESCRIPTION = 'Get tweets from the Twitter Frontend API without authentication.'
+DESCRIPTION = 'Get tweets from the Twitter Frontend API.'
 URL = 'https://github.com/ferguras/twitter-analysis'
-EMAIL = 'ferguras@solwar.org'
+EMAIL = 'twitter@solarwar.org'
 AUTHOR = 'Edwin de Haan'
-VERSION = '0.0.1'
+VERSION = '0.0.1.dev1'
+KEYWORDS = 'twitter tweets'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -80,7 +81,7 @@ setup(
     author_email=EMAIL,
     url=URL,
     # If your package is a single module, use this instead of 'packages':
-    py_modules=['twitter_scraper'],
+    py_modules=['twitter_analysis'],
 
     # entry_points={
     #     'console_scripts': ['mycli=mymodule:cli'],
