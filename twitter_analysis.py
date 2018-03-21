@@ -61,14 +61,25 @@ def get_tweets(user, tweets=100, retweets=True, maxpages=25):
                             for url_node in tweet.find('a.twitter-timeline-link:not(.u-hidden)')]
                     photos = [photo_node.attrs['data-image-url']
                               for photo_node in tweet.find('.AdaptiveMedia-photoContainer')]
+                    videos = []
+                    video_nodes = tweet.find(".PlayableMedia-player")
+                    for node in video_nodes:
+                        styles = node.attrs['style'].split()
+                        for style in styles:
+                            if style.startswith('background'):
+                                tmp = style.split('/')[-1]
+                                video_id = tmp[:tmp.index('.jpg')]
+                                videos.append({'id': video_id})   
+                    emoji = [emoji_node.attrs['title']
+                              for emoji_node in tweet.find('.Emoji')]                                
                     if retweets or orginalUserId.lower() == user.lower():
                         found += -1
                         tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'orginaluser': orginalUserId,
                                         'text': text, 'raw' : raw, 'replies': replies, 'retweets': retweets, 'likes': likes,
                                        'entries': {
-                                           'hashtags': hashtags,
+                                           'hashtags': hashtags, 'emoji' : emoji,
                                            'urls': urls,
-                                           'photos': photos
+                                           'photos': photos, 'videos' : videos
                                        }
                                        })
 
