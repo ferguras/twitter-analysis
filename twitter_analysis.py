@@ -4,7 +4,7 @@ from datetime import datetime
 
 session = HTMLSession()
 
-def get_tweets(user, tweets=100, retweets=True, maxpages=25):
+def get_tweets(user, tweets=100, retweets=False, notext=False, maxpages=25):
     """Gets tweets for a given user, via the Twitter frontend API."""
 
     url = f'https://twitter.com/i/profiles/show/{user}/timeline/tweets?include_available_features=1&include_entities=1&include_new_items_bar=true'
@@ -16,7 +16,7 @@ def get_tweets(user, tweets=100, retweets=True, maxpages=25):
         'X-Requested-With': 'XMLHttpRequest'
     }
 
-    def gen_tweets(tweets, retweets, maxpages):
+    def gen_tweets(tweets, retweets, notext, maxpages):
         r = session.get(url, headers=headers)
         pages = maxpages
         found = tweets
@@ -64,15 +64,21 @@ def get_tweets(user, tweets=100, retweets=True, maxpages=25):
                     videos = []
                     video_nodes = tweet.find(".PlayableMedia-player")
                     for node in video_nodes:
-                        styles = node.attrs['style'].split()
-                        for style in styles:
-                            if style.startswith('background'):
-                                tmp = style.split('/')[-1]
-                                video_id = tmp[:tmp.index('.jpg')]
-                                videos.append({'id': video_id})   
+                        try:
+                            styles = node.attrs['style'].split()
+                            for style in styles:
+                                if style.startswith('background'):
+                                    tmp = style.split('/')[-1]
+                                    video_id = tmp[:tmp.index('.jpg')]
+                                    videos.append({'id': video_id})  
+                        except ValueError:
+                            continue
+                        
                     emoji = [emoji_node.attrs['title']
-                              for emoji_node in tweet.find('.Emoji')]                                
-                    if retweets or orginalUserId.lower() == user.lower():
+                              for emoji_node in tweet.find('.Emoji')]   
+                    correcttweet=retweets or orginalUserId.lower() == user.lower()
+                    tweetsize=notext or len(text)>0
+                    if correcttweet and tweetsize:
                         found += -1
                         tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'orginaluser': orginalUserId,
                                         'text': text, 'raw' : raw, 'replies': replies, 'retweets': retweets, 'likes': likes,
@@ -83,8 +89,7 @@ def get_tweets(user, tweets=100, retweets=True, maxpages=25):
                                        }
                                        })
 
-            last_tweet = html.find(
-                '.stream-item')[-1].attrs['data-item-id']
+            last_tweet = html.find('.stream-item')[-1].attrs['data-item-id']
 
             for tweet in tweets:
                 if tweet:
@@ -92,7 +97,7 @@ def get_tweets(user, tweets=100, retweets=True, maxpages=25):
                     remove = 'pic.twitter.com'
                     removelen = len(remove) + 11
                     index = tweet['text'].find(remove)
-                    while index > 0:
+                    while index > -1:
                         tweet['text'] = tweet['text'][0:index] + \
                             tweet['text'][index + removelen:]
                         index = tweet['text'].find('pic.twitter.com')
@@ -102,4 +107,4 @@ def get_tweets(user, tweets=100, retweets=True, maxpages=25):
                 url, params={'max_position': last_tweet}, headers=headers)
             pages += -1
 
-    yield from gen_tweets(tweets, retweets, maxpages)
+    yield from gen_tweets(tweets, retweets, notext, maxpages)

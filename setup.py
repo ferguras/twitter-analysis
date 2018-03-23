@@ -17,7 +17,7 @@ DESCRIPTION = 'Get tweets from the Twitter Frontend API.'
 URL = 'https://github.com/ferguras/twitter-analysis'
 EMAIL = 'twitter@solarwar.org'
 AUTHOR = 'Edwin de Haan'
-VERSION = '0.0.1.dev1'
+VERSION = '0.0.3'
 KEYWORDS = 'twitter tweets'
 
 # What packages are required for this module to be executed?
