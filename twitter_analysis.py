@@ -4,7 +4,7 @@ from datetime import datetime
 
 session = HTMLSession()
 
-def get_tweets(user, tweets=100, retweets=False, notext=False, maxpages=25):
+def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxpages=25):
     """Gets tweets for a given user, via the Twitter frontend API."""
 
     url = f'https://twitter.com/i/profiles/show/{user}/timeline/tweets?include_available_features=1&include_entities=1&include_new_items_bar=true'
@@ -16,7 +16,7 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, maxpages=25):
         'X-Requested-With': 'XMLHttpRequest'
     }
 
-    def gen_tweets(tweets, retweets, notext, maxpages):
+    def gen_tweets(tweets, retweets, notext, adddot, maxpages):
         r = session.get(url, headers=headers)
         pages = maxpages
         found = tweets
@@ -36,7 +36,16 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, maxpages=25):
                 data = tweet.find('.tweet-text')
                 if len(data) > 0:
                     text = tweet.find('.tweet-text')[0].full_text
-                    raw = tweet.find('.tweet-text')[0].raw_html
+                    text = re.sub(' +',' ', text)
+                    text = re.sub('http', ' http', text, 1)
+                    remove = 'pic.twitter.com'
+                    removelen = len(remove) + 11
+                    index = text.find(remove)
+                    while index > -1:
+                        text = text[0:index] + text[index + removelen:]
+                        index = text.find('pic.twitter.com')
+                    text=text.lstrip()
+                    text=text.rstrip()                      
                     tweetId = tweet.find(
                         '.js-permalink')[0].attrs['data-conversation-id']
                     orginalUserId = tweet.find(
@@ -77,11 +86,15 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, maxpages=25):
                     emoji = [emoji_node.attrs['title']
                               for emoji_node in tweet.find('.Emoji')]   
                     correcttweet=retweets or orginalUserId.lower() == user.lower()
-                    tweetsize=notext or len(text)>0
-                    if correcttweet and tweetsize:
+                    tweetsize=len(text)
+                    accepttweet = notext or tweetsize>0
+                    if correcttweet and accepttweet:
                         found += -1
+                        if adddot and tweetsize>0:
+                            if not (text[tweetsize-1]=='!' or text[tweetsize-1]=='?' or text[tweetsize-1]=='.') :
+                                text +='.'
                         tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'orginaluser': orginalUserId,
-                                        'text': text, 'raw' : raw, 'replies': replies, 'retweets': retweets, 'likes': likes,
+                                        'text': text, 'size': len(text), 'replies': replies, 'retweets': retweets, 'likes': likes,
                                        'entries': {
                                            'hashtags': hashtags, 'emoji' : emoji,
                                            'urls': urls,
@@ -93,18 +106,10 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, maxpages=25):
 
             for tweet in tweets:
                 if tweet:
-                    tweet['text'] = re.sub('http', ' http', tweet['text'], 1)
-                    remove = 'pic.twitter.com'
-                    removelen = len(remove) + 11
-                    index = tweet['text'].find(remove)
-                    while index > -1:
-                        tweet['text'] = tweet['text'][0:index] + \
-                            tweet['text'][index + removelen:]
-                        index = tweet['text'].find('pic.twitter.com')
                     yield tweet
 
             r = session.get(
                 url, params={'max_position': last_tweet}, headers=headers)
             pages += -1
 
-    yield from gen_tweets(tweets, retweets, notext, maxpages)
+    yield from gen_tweets(tweets, retweets, notext, adddot, maxpages)
