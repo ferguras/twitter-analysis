@@ -3,7 +3,7 @@ import simplejson
 
 thefile = open('tweets.txt', 'w')
 
-tweets = list(get_tweets('Urbandecay', tweets=100))
+tweets = list(get_tweets('Urbandecay', tweets=100, retweets=False))
 
 for tweet in tweets:
 	print(tweet['text'])

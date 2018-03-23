@@ -36,16 +36,17 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                 data = tweet.find('.tweet-text')
                 if len(data) > 0:
                     text = tweet.find('.tweet-text')[0].full_text
-                    text = re.sub(' +',' ', text)
-                    text = re.sub('http', ' http', text, 1)
+                    text = re.sub('\Shttp', ' http', text, 1)
+                    text = re.sub('.@','@',text)
                     remove = 'pic.twitter.com'
                     removelen = len(remove) + 11
                     index = text.find(remove)
                     while index > -1:
                         text = text[0:index] + text[index + removelen:]
                         index = text.find('pic.twitter.com')
-                    text=text.lstrip()
-                    text=text.rstrip()                      
+                    text = text.replace(u'\xa0', u' ') 
+                    text = re.sub('[ \t\f\v]+',' ', text)
+                    text = text.strip()                    
                     tweetId = tweet.find(
                         '.js-permalink')[0].attrs['data-conversation-id']
                     orginalUserId = tweet.find(
@@ -85,16 +86,18 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                         
                     emoji = [emoji_node.attrs['title']
                               for emoji_node in tweet.find('.Emoji')]   
-                    correcttweet=retweets or orginalUserId.lower() == user.lower()
+                    correcttweet=retweets==True or orginalUserId.lower() == user.lower()
                     tweetsize=len(text)
-                    accepttweet = notext or tweetsize>0
+                    accepttweet = notext==True or tweetsize>0
                     if correcttweet and accepttweet:
                         found += -1
-                        if adddot and tweetsize>0:
-                            if not (text[tweetsize-1]=='!' or text[tweetsize-1]=='?' or text[tweetsize-1]=='.') :
+                        if adddot and tweetsize>0 :
+                            if not (text[-1]=='!' or text[-1]=='?' or text[-1]=='.') :
                                 text +='.'
+                        text=text.replace(' .','.')
+                        index = text.find('pic.twitter.com')
                         tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'orginaluser': orginalUserId,
-                                        'text': text, 'size': len(text), 'replies': replies, 'retweets': retweets, 'likes': likes,
+                                        'text': text, 'replies': replies, 'retweets': retweets, 'likes': likes,
                                        'entries': {
                                            'hashtags': hashtags, 'emoji' : emoji,
                                            'urls': urls,
