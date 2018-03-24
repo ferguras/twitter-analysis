@@ -34,76 +34,76 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
             tweets = []
             for tweet in html.find('.stream-item'):
                 data = tweet.find('.tweet-text')
-                if len(data) > 0:
-                    text = tweet.find('.tweet-text')[0].full_text
-                    text = re.sub('\Shttp', ' http', text, 1)
-                    text = re.sub('.@','@',text)
-                    remove = 'pic.twitter.com'
-                    removelen = len(remove) + 11
-                    index = text.find(remove)
-                    while index > -1:
-                        text = text[0:index] + text[index + removelen:]
-                        index = text.find('pic.twitter.com')
-                    text = text.replace(u'\xa0', u' ') 
-                    text = re.sub('[ \t\f\v]+',' ', text)
-                    text = text.strip()                    
-                    tweetId = tweet.find(
-                        '.js-permalink')[0].attrs['data-conversation-id']
-                    orginalUserId = tweet.find(
-                        '.js-original-tweet')[0].attrs['data-screen-name']
-                    time = datetime.fromtimestamp(
-                        int(tweet.find('._timestamp')[0].attrs['data-time-ms']) / 1000.0)
-                    time = time.strftime("%Y-%m-%d %H:%M:%S")
-                    interactions = [
-                        x.text for x in tweet.find('.ProfileTweet-actionCount')]
-                    replies = int(
-                        interactions[0].split(" ")[0].replace(
-                            comma, "").replace(dot, ""))
-                    retweets = int(
-                        interactions[1].split(" ")[0].replace(
-                            comma, "").replace(dot, ""))
-                    likes = int(
-                        interactions[2].split(" ")[0].replace(
-                            comma, "").replace(dot, ""))
-                    hashtags = [
-                        hashtag_node.full_text for hashtag_node in tweet.find('.twitter-hashtag')]
-                    urls = [url_node.attrs['data-expanded-url']
-                            for url_node in tweet.find('a.twitter-timeline-link:not(.u-hidden)')]
-                    photos = [photo_node.attrs['data-image-url']
-                              for photo_node in tweet.find('.AdaptiveMedia-photoContainer')]
-                    videos = []
-                    video_nodes = tweet.find(".PlayableMedia-player")
-                    for node in video_nodes:
-                        try:
-                            styles = node.attrs['style'].split()
-                            for style in styles:
-                                if style.startswith('background'):
-                                    tmp = style.split('/')[-1]
-                                    video_id = tmp[:tmp.index('.jpg')]
-                                    videos.append({'id': video_id})  
-                        except ValueError:
-                            continue
-                        
-                    emoji = [emoji_node.attrs['title']
-                              for emoji_node in tweet.find('.Emoji')]   
-                    correcttweet=retweets==True or orginalUserId.lower() == user.lower()
-                    tweetsize=len(text)
-                    accepttweet = notext==True or tweetsize>0
-                    if correcttweet and accepttweet:
-                        found += -1
-                        if adddot and tweetsize>0 :
-                            if not (text[-1]=='!' or text[-1]=='?' or text[-1]=='.') :
-                                text +='.'
-                        text=text.replace(' .','.')
-                        index = text.find('pic.twitter.com')
-                        tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'orginaluser': orginalUserId,
-                                        'text': text, 'replies': replies, 'retweets': retweets, 'likes': likes,
-                                       'entries': {
-                                           'hashtags': hashtags, 'emoji' : emoji,
-                                           'urls': urls,
-                                           'photos': photos, 'videos' : videos
-                                       }
-                                       })
+                if len(data) < 1 :
+                    continue
+                text = tweet.find('.tweet-text')[0].full_text
+                text = re.sub('\Shttp', ' http', text, 1)
+                text = re.sub('.@','@',text)
+                remove = 'pic.twitter.com'
+                removelen = len(remove) + 11
+                index = text.find(remove)
+                while index > -1:
+                    text = text[0:index] + text[index + removelen:]
+                    index = text.find('pic.twitter.com')
+                text = text.replace(u'\xa0', u' ') 
+                text = re.sub('[ \t\f\v]+',' ', text)
+                text = text.strip()                    
+                tweetId = tweet.find(
+                    '.js-permalink')[0].attrs['data-conversation-id']
+                orginalUserId = tweet.find(
+                    '.js-original-tweet')[0].attrs['data-screen-name']
+                time = datetime.fromtimestamp(
+                    int(tweet.find('._timestamp')[0].attrs['data-time-ms']) / 1000.0)
+                time = time.strftime("%Y-%m-%d %H:%M:%S")
+                interactions = [
+                    x.text for x in tweet.find('.ProfileTweet-actionCount')]
+                replies = int(
+                    interactions[0].split(" ")[0].replace(
+                        comma, "").replace(dot, ""))
+                retweets = int(
+                    interactions[1].split(" ")[0].replace(
+                        comma, "").replace(dot, ""))
+                likes = int(
+                    interactions[2].split(" ")[0].replace(
+                        comma, "").replace(dot, ""))
+                hashtags = [
+                    hashtag_node.full_text for hashtag_node in tweet.find('.twitter-hashtag')]
+                urls = [url_node.attrs['data-expanded-url']
+                        for url_node in tweet.find('a.twitter-timeline-link:not(.u-hidden)')]
+                photos = [photo_node.attrs['data-image-url']
+                          for photo_node in tweet.find('.AdaptiveMedia-photoContainer')]
+                videos = []
+                video_nodes = tweet.find(".PlayableMedia-player")
+                for node in video_nodes:
+                    try:
+                        styles = node.attrs['style'].split()
+                        for style in styles:
+                            if style.startswith('background'):
+                                tmp = style.split('/')[-1]
+                                video_id = tmp[:tmp.index('.jpg')]
+                                videos.append({'id': video_id})  
+                    except ValueError:
+                        continue
+                    
+                emoji = [emoji_node.attrs['title']
+                          for emoji_node in tweet.find('.Emoji')]   
+                correcttweet=retweets==True or orginalUserId.lower() == user.lower()
+                tweetsize=len(text)
+                accepttweet = notext==True or tweetsize>0
+                if correcttweet and accepttweet:
+                    found += -1
+                    if adddot and tweetsize>0 :
+                        if not (text[-1]=='!' or text[-1]=='?' or text[-1]=='.') :
+                            text +='.'
+                    text=text.replace(' .','.')
+                    tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'orginaluser': orginalUserId,
+                                    'text': text, 'replies': replies, 'retweets': retweets, 'likes': likes,
+                                   'entries': {
+                                       'hashtags': hashtags, 'emoji' : emoji,
+                                       'urls': urls,
+                                       'photos': photos, 'videos' : videos
+                                   }
+                                   })
 
             last_tweet = html.find('.stream-item')[-1].attrs['data-item-id']
 
