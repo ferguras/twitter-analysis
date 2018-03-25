@@ -36,6 +36,7 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                 data = tweet.find('.tweet-text')
                 if len(data) < 1 :
                     continue
+                raw = tweet.find('.tweet-text')[0].raw_html
                 text = tweet.find('.tweet-text')[0].full_text
                 text = re.sub('\Shttp', ' http', text, 1)
                 text = re.sub('.@','@',text)
@@ -91,7 +92,6 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                 tweetsize=len(text)
                 accepttweet = notext==True or tweetsize>0
                 if correcttweet and accepttweet:
-                    found += -1
                     if adddot and tweetsize>0 :
                         if not (text[-1]=='!' or text[-1]=='?' or text[-1]=='.') :
                             text +='.'
@@ -109,6 +109,7 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
 
             for tweet in tweets:
                 if tweet:
+                    found += -1
                     yield tweet
 
             r = session.get(
