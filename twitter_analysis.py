@@ -46,12 +46,12 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                 while index > -1:
                     text = text[0:index] + text[index + removelen:]
                     index = text.find('pic.twitter.com')
-                text = text.replace(u'\xa0', u' ') 
+                text = text.replace(u'\xa0', u' ')
                 text = re.sub('[ \t\f\v]+',' ', text)
-                text = text.strip()                    
+                text = text.strip()
                 tweetId = tweet.find(
                     '.js-permalink')[0].attrs['data-conversation-id']
-                orginalUserId = tweet.find(
+                originaluserId = tweet.find(
                     '.js-original-tweet')[0].attrs['data-screen-name']
                 time = datetime.fromtimestamp(
                     int(tweet.find('._timestamp')[0].attrs['data-time-ms']) / 1000.0)
@@ -82,13 +82,13 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                             if style.startswith('background'):
                                 tmp = style.split('/')[-1]
                                 video_id = tmp[:tmp.index('.jpg')]
-                                videos.append({'id': video_id})  
+                                videos.append({'id': video_id})
                     except ValueError:
                         continue
-                    
+
                 emoji = [emoji_node.attrs['title']
-                          for emoji_node in tweet.find('.Emoji')]   
-                correcttweet=retweets==True or orginalUserId.lower() == user.lower()
+                          for emoji_node in tweet.find('.Emoji')]
+                correcttweet=retweets==True or originaluserId.lower() == user.lower()
                 tweetsize=len(text)
                 accepttweet = notext==True or tweetsize>0
                 if correcttweet and accepttweet:
@@ -96,7 +96,7 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                         if not (text[-1]=='!' or text[-1]=='?' or text[-1]=='.') :
                             text +='.'
                     text=text.replace(' .','.')
-                    tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'orginaluser': orginalUserId,
+                    tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'originaluser': originaluserId,
                                     'text': text, 'replies': replies, 'retweets': retweets, 'likes': likes,
                                    'entries': {
                                        'hashtags': hashtags, 'emoji' : emoji,
