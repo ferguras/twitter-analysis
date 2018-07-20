@@ -4,6 +4,7 @@ from datetime import datetime
 
 session = HTMLSession()
 
+
 def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxpages=25):
     """Gets tweets for a given user, via the Twitter frontend API."""
 
@@ -34,12 +35,12 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
             tweets = []
             for tweet in html.find('.stream-item'):
                 data = tweet.find('.tweet-text')
-                if len(data) < 1 :
+                if len(data) < 1:
                     continue
                 raw = tweet.find('.tweet-text')[0].raw_html
                 text = tweet.find('.tweet-text')[0].full_text
                 text = re.sub('\Shttp', ' http', text, 1)
-                text = re.sub('.@','@',text)
+                text = re.sub('.@', '@', text)
                 remove = 'pic.twitter.com'
                 removelen = len(remove) + 11
                 index = text.find(remove)
@@ -47,7 +48,7 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                     text = text[0:index] + text[index + removelen:]
                     index = text.find('pic.twitter.com')
                 text = text.replace(u'\xa0', u' ')
-                text = re.sub('[ \t\f\v]+',' ', text)
+                text = re.sub('[ \t\f\v]+', ' ', text)
                 text = text.strip()
                 tweetId = tweet.find(
                     '.js-permalink')[0].attrs['data-conversation-id']
@@ -58,15 +59,12 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                 time = time.strftime("%Y-%m-%d %H:%M:%S")
                 interactions = [
                     x.text for x in tweet.find('.ProfileTweet-actionCount')]
-                replies = int(
-                    interactions[0].split(" ")[0].replace(
-                        comma, "").replace(dot, ""))
-                retweets = int(
-                    interactions[1].split(" ")[0].replace(
-                        comma, "").replace(dot, ""))
-                likes = int(
-                    interactions[2].split(" ")[0].replace(
-                        comma, "").replace(dot, ""))
+                replies = interactions[0].split(" ")[0].replace(
+                    comma, "").replace(dot, "") or "0"
+                retweets = interactions[1].split(" ")[0].replace(
+                    comma, "").replace(dot, "") or "0"
+                likes = interactions[2].split(" ")[0].replace(
+                    comma, "").replace(dot, "") or "0"
                 hashtags = [
                     hashtag_node.full_text for hashtag_node in tweet.find('.twitter-hashtag')]
                 urls = [url_node.attrs['data-expanded-url']
@@ -87,21 +85,21 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                         continue
 
                 emoji = [emoji_node.attrs['title']
-                          for emoji_node in tweet.find('.Emoji')]
-                correcttweet=retweets==True or originaluserId.lower() == user.lower()
-                tweetsize=len(text)
-                accepttweet = notext==True or tweetsize>0
+                         for emoji_node in tweet.find('.Emoji')]
+                correcttweet = retweets == True or originaluserId.lower() == user.lower()
+                tweetsize = len(text)
+                accepttweet = notext == True or tweetsize > 0
                 if correcttweet and accepttweet:
-                    if adddot and tweetsize>0 :
-                        if not (text[-1]=='!' or text[-1]=='?' or text[-1]=='.') :
-                            text +='.'
-                    text=text.replace(' .','.')
+                    if adddot and tweetsize > 0:
+                        if not (text[-1] == '!' or text[-1] == '?' or text[-1] == '.'):
+                            text += '.'
+                    text = text.replace(' .', '.')
                     tweets.append({'tweetId': tweetId, 'time': time, 'user': user, 'originaluser': originaluserId,
-                                    'text': text, 'replies': replies, 'retweets': retweets, 'likes': likes,
+                                   'text': text, 'replies': replies, 'retweets': retweets, 'likes': likes,
                                    'entries': {
-                                       'hashtags': hashtags, 'emoji' : emoji,
+                                       'hashtags': hashtags, 'emoji': emoji,
                                        'urls': urls,
-                                       'photos': photos, 'videos' : videos
+                                       'photos': photos, 'videos': videos
                                    }
                                    })
 
