@@ -1,6 +1,7 @@
 import re
 from requests_html import HTMLSession, HTML
 from datetime import datetime
+from ftfy import fix_text
 
 session = HTMLSession()
 
@@ -49,7 +50,8 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                     index = text.find('pic.twitter.com')
                 text = text.replace(u'\xa0', u' ')
                 text = re.sub('[ \t\f\v]+', ' ', text)
-                text = text.strip()
+                # fixes common encoding problems in the tweet text body
+                text = fix_text(text.strip())
                 tweetId = tweet.find(
                     '.js-permalink')[0].attrs['data-conversation-id']
                 originaluserId = tweet.find(
