@@ -44,7 +44,7 @@ def get_tweets(user, tweets=None, retweets=False, notext=False, adddot=True, max
                 raw = tweet.find('.tweet-text')[0].raw_html
                 text = tweet.find('.tweet-text')[0].full_text
                 text = re.sub('\Shttp', ' http', text, 1)
-                text = re.sub('.@', '@', text)
+                text = re.sub('.@', ' @', text)
                 remove = 'pic.twitter.com'
                 removelen = len(remove) + 11
                 index = text.find(remove)
