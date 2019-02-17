@@ -6,7 +6,7 @@ from ftfy import fix_text
 session = HTMLSession()
 
 
-def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxpages=25):
+def get_tweets(user, tweets=None, retweets=False, notext=False, adddot=True, maxpages=25):
     """Gets tweets for a given user, via the Twitter frontend API."""
 
     url = f'https://twitter.com/i/profiles/show/{user}/timeline/tweets?include_available_features=1&include_entities=1&include_new_items_bar=true'
@@ -21,11 +21,14 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
     def gen_tweets(tweets, retweets, notext, adddot, maxpages):
         r = session.get(url, headers=headers)
         pages = maxpages
-        found = tweets
+        json = r.json()
+        # if no number of tweets specified, all tweets from the json will be returned
+        found = tweets or json['new_latent_count'] - 1
 
         while pages > 0 and found > 0:
+            json = r.json()
             try:
-                html = HTML(html=r.json()['items_html'],
+                html = HTML(html=json['items_html'],
                             url='bunk', default_encoding='utf-8')
             except KeyError:
                 raise ValueError(
@@ -41,7 +44,7 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                 raw = tweet.find('.tweet-text')[0].raw_html
                 text = tweet.find('.tweet-text')[0].full_text
                 text = re.sub('\Shttp', ' http', text, 1)
-                text = re.sub('.@', '@', text)
+                text = re.sub('.@', ' @', text)
                 remove = 'pic.twitter.com'
                 removelen = len(remove) + 11
                 index = text.find(remove)
@@ -105,15 +108,14 @@ def get_tweets(user, tweets=100, retweets=False, notext=False, adddot=True, maxp
                                    }
                                    })
 
-            last_tweet = html.find('.stream-item')[-1].attrs['data-item-id']
-
             for tweet in tweets:
-                if tweet:
+                if tweet and found > 0:
                     found += -1
                     yield tweet
 
-            r = session.get(
-                url, params={'max_position': last_tweet}, headers=headers)
-            pages += -1
+            if json['has_more_items'] == True:
+                last_tweet = html.find('.stream-item')[-1].attrs['data-item-id']
+                r = session.get(url, params={'max_position': last_tweet}, headers=headers)
+                pages += -1
 
     yield from gen_tweets(tweets, retweets, notext, adddot, maxpages)
