@@ -117,5 +117,9 @@ def get_tweets(user, tweets=None, retweets=False, notext=False, adddot=True, max
                 last_tweet = html.find('.stream-item')[-1].attrs['data-item-id']
                 r = session.get(url, params={'max_position': last_tweet}, headers=headers)
                 pages += -1
+            else:
+                # reset the count regardless since there are no more tweets left
+                found = 0
+
 
     yield from gen_tweets(tweets, retweets, notext, adddot, maxpages)
